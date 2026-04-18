@@ -1,0 +1,133 @@
+:root {
+  --bg: #0b0b0d;
+  --bg-elevated: rgba(19, 19, 22, 0.84);
+  --panel: rgba(24, 24, 28, 0.88);
+  --panel-strong: rgba(32, 32, 38, 0.96);
+  --text: #f5efe8;
+  --text-soft: #b7aea4;
+  --heading: #fffaf6;
+  --border: rgba(255, 255, 255, 0.1);
+  --accent: #f1882c;
+  --accent-strong: #ff9d42;
+  --accent-soft: rgba(241, 136, 44, 0.15);
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 18px 36px rgba(0, 0, 0, 0.18);
+  --button-text: #120f0b;
+}
+
+[data-theme="light"] {
+  --bg: #f6f1ea;
+  --bg-elevated: rgba(255, 250, 245, 0.88);
+  --panel: rgba(255, 255, 255, 0.9);
+  --panel-strong: rgba(255, 247, 240, 0.96);
+  --text: #32281f;
+  --text-soft: #75685c;
+  --heading: #17120e;
+  --border: rgba(23, 18, 14, 0.08);
+  --accent: #df7425;
+  --accent-strong: #f1882c;
+  --accent-soft: rgba(223, 116, 37, 0.12);
+  --shadow: 0 24px 80px rgba(61, 39, 18, 0.14);
+  --shadow-soft: 0 18px 36px rgba(61, 39, 18, 0.1);
+  --button-text: #fff9f4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  font-family:
+    "Segoe UI",
+    "Inter",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition:
+    background 280ms ease,
+    color 280ms ease;
+}
+
+a,
+button {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.section-kicker {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--accent-strong);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.button {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.9rem 1.4rem;
+  transition:
+    transform 200ms ease,
+    border-color 200ms ease,
+    background 200ms ease,
+    color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.button--primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: var(--button-text);
+  box-shadow: 0 14px 32px rgba(241, 136, 44, 0.26);
+}
+
+.button--secondary,
+.button--ghost {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.button--ghost:hover,
+.button--secondary:hover {
+  border-color: var(--accent);
+  color: var(--heading);
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity 700ms ease,
+    transform 700ms ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}

@@ -1,0 +1,135 @@
+.hero {
+  padding: 2rem 0 4.5rem;
+}
+
+.hero__content {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.hero__copy h1 {
+  margin: 0 0 1rem;
+  color: var(--heading);
+  font-size: clamp(3rem, 7vw, 5.8rem);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+}
+
+.hero__copy p {
+  max-width: 42rem;
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 1.08rem;
+  line-height: 1.9;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 2rem;
+}
+
+.hero__visual-card {
+  position: relative;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 2.2rem;
+  background: linear-gradient(135deg, var(--panel), rgba(255, 255, 255, 0.02));
+  box-shadow: var(--shadow);
+  animation: float-card 7s ease-in-out infinite;
+}
+
+.hero__visual-card img {
+  width: 100%;
+  min-height: 420px;
+  object-fit: cover;
+  border-radius: 1.5rem;
+}
+
+.hero__floating-note {
+  position: absolute;
+  right: 1.2rem;
+  bottom: 1.2rem;
+  width: min(18rem, calc(100% - 2.4rem));
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.4rem;
+  background: rgba(11, 11, 14, 0.78);
+  color: #fffaf6;
+  backdrop-filter: blur(16px);
+}
+
+[data-theme="light"] .hero__floating-note {
+  background: rgba(255, 250, 244, 0.92);
+  color: var(--heading);
+}
+
+.hero__floating-note strong,
+.hero__stat strong {
+  display: block;
+}
+
+.hero__floating-note span {
+  display: block;
+  margin-top: 0.45rem;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+
+.hero__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.hero__stat {
+  padding: 1.3rem;
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.hero__stat span {
+  display: block;
+  margin-bottom: 0.6rem;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hero__stat strong {
+  color: var(--heading);
+  font-size: 1.08rem;
+  line-height: 1.5;
+}
+
+@keyframes float-card {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@media (max-width: 900px) {
+  .hero__content {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__stats {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__visual-card img {
+    min-height: 320px;
+  }
+}

@@ -1,0 +1,33 @@
+.footer {
+  padding: 1rem 0 3rem;
+}
+
+.footer__panel {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.8rem 2rem;
+  border: 1px solid var(--border);
+  border-radius: 2rem;
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.footer__panel h3 {
+  margin: 0;
+  color: var(--heading);
+  font-size: 1.6rem;
+}
+
+.footer__panel p {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--text-soft);
+  line-height: 1.8;
+}
+
+@media (max-width: 760px) {
+  .footer__panel {
+    flex-direction: column;
+  }
+}
