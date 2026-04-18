@@ -166,7 +166,7 @@ export default function ValidationCenter() {
       <section className="validation-center__hero">
         <Reveal className="validation-center__copy">
           <span className="section-kicker">Validation Center</span>
-          <h3>The React frontend now runs the full PCB review workflow.</h3>
+          <h3>Welcome to the Validation Center</h3>
           <p>
             Upload a candidate board, adjust exact rule thresholds, compare against a reference,
             and download the report directly from this interface.
@@ -297,21 +297,16 @@ export default function ValidationCenter() {
         </form>
 
         <div className="validation-results">
-          <div className="validation-results__summary">
-            {summaryCards.length ? (
-              summaryCards.map((card) => (
-                <Reveal className="validation-metric" key={card.label}>
+          {summaryCards.length ? (
+            <Reveal className="validation-results__summary validation-results__summary--popup">
+              {summaryCards.map((card) => (
+                <div className="validation-metric" key={card.label}>
                   <span>{card.label}</span>
                   <strong>{card.value}</strong>
-                </Reveal>
-              ))
-            ) : (
-              <div className="validation-empty">
-                <strong>No validation run yet</strong>
-                <span>Run the form on the left to see metrics, results, and the PDF report.</span>
-              </div>
-            )}
-          </div>
+                </div>
+              ))}
+            </Reveal>
+          ) : null}
 
           {result ? (
             <>
