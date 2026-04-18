@@ -1,40 +1,22 @@
 # TraceWise PCB Validator
 
-TraceWise is a PCB design validation platform built for early-stage review of KiCad board files. It combines exact rule-based checking, reference-board comparison, and AI-assisted guidance so engineering teams can catch layout issues before fabrication review.
+TraceWise is a PCB design validation platform for early-stage review of KiCad board files. It combines exact rule-based checking, reference-board comparison, optional AI-assisted guidance, and a React frontend that now owns the full product workflow.
 
 ## What It Does
 
-- Validates real `.kicad_pcb` files at design time
+- Validates real `.kicad_pcb` and `.dxf` files
 - Checks board size, drill count, hole diameter, trace width, spacing, and routing health
 - Compares a candidate board against an approved reference PCB
 - Generates severity-based validation results and a compact PDF report
-- Supports AI guidance for plain-English explanation and fix suggestions
-
-## Why It Matters
-
-PCB review is often slow, manual, and dependent on expert checking. TraceWise helps teams detect design drift and rule violations earlier, reducing rework and improving first-pass design quality.
+- Supports optional AI guidance for plain-English explanation and fix suggestions
 
 ## Core Features
 
+- React frontend for the full validation flow
+- FastAPI backend for upload, validation, reporting, and AI orchestration
 - Rule-based PCB validation
 - Reference comparison against an approved board
-- AI copilot for explanation and prioritization
-- Watcher-based near real-time validation workflow
 - PDF validation report generation
-
-## Project Screens
-
-### Problem Statement Visual
-
-![Problem Statement Hero](assets/problem-statement-hero.png)
-
-### Workflow Animation
-
-![Workflow Animation](assets/workflow-animation.gif)
-
-### Validation Cycle
-
-![Validation Cycle](assets/validation-cycle.gif)
 
 ## Demo Boards Included
 
@@ -43,7 +25,9 @@ PCB review is often slow, manual, and dependent on expert checking. TraceWise he
 
 ## Tech Stack
 
-- Streamlit
+- React
+- Plain CSS
+- FastAPI
 - Python
 - KiCad `.kicad_pcb` parsing
 - Custom rule engine
@@ -52,10 +36,33 @@ PCB review is often slow, manual, and dependent on expert checking. TraceWise he
 
 ## Run Locally
 
+Install backend dependencies:
+
 ```powershell
 pip install -r requirements.txt
-streamlit run apps.py
 ```
+
+Install frontend dependencies:
+
+```powershell
+cd frontend
+npm install
+```
+
+Start the backend API:
+
+```powershell
+python apps.py
+```
+
+Start the React frontend in a second terminal:
+
+```powershell
+cd frontend
+npm run dev
+```
+
+Open the frontend at `http://127.0.0.1:5173`.
 
 ## AI Setup
 
@@ -64,23 +71,25 @@ Set either one of these environment variables:
 - `GEMINI_API_KEY`
 - `OPENAI_API_KEY`
 
-The core rule-based validator still works even without an AI key.
+The core rule-based validator still works without an AI key.
 
 ## Repository Structure
 
 ```text
 tracewise-pcb-validator/
-├── apps.py
-├── rule_app.py
-├── cad_rules.py
-├── kicad_parser.py
-├── pcb_rule_watcher.py
-├── pcb_report_generator.py
-├── llm_assistant.py
-├── demo_boards/
-└── assets/
+|-- api_server.py
+|-- apps.py
+|-- validation_service.py
+|-- cad_rules.py
+|-- kicad_parser.py
+|-- cad_parser.py
+|-- pcb_report_generator.py
+|-- llm_assistant.py
+|-- demo_boards/
+|-- assets/
+`-- frontend/
 ```
 
 ## Status
 
-This is a focused prototype for AI-assisted PCB design validation and review.
+This is now an API-backed React product prototype for AI-assisted PCB design validation and review.
