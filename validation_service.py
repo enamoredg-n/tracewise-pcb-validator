@@ -278,6 +278,9 @@ def run_validation(
         ai_guidance=ai_guidance,
     )
     preview_png = encode_image_png(build_pcb_preview(candidate_geometry))
+    reference_preview_png = (
+        encode_image_png(build_pcb_preview(reference_geometry)) if reference_geometry is not None else None
+    )
 
     return {
         "candidate": {
@@ -289,6 +292,7 @@ def run_validation(
         "reference": {
             "name": reference_label,
             "metrics": metrics_summary(reference_geometry) if reference_geometry is not None else None,
+            "preview_png_base64": reference_preview_png,
         },
         "summary": combined,
         "severity_counts": severity_counts,

@@ -8,7 +8,7 @@ export default function HeroSection({ onOpenValidationCenter }) {
       <div className="hero__content">
         <Reveal className="hero__copy">
           <span className="section-kicker">Presentation-grade PCB validation</span>
-          <h1>A modern product story for parser-led review, rule accuracy, and AI-assisted decisions.</h1>
+          <h3>A modern product story for parser-led review, rule accuracy, and AI-assisted decisions.</h3>
           <p>
             TraceWise is framed like a real product launch page: confident, structured, and grounded
             in actual engineering workflow instead of generic dashboard styling.
@@ -25,11 +25,7 @@ export default function HeroSection({ onOpenValidationCenter }) {
 
         <Reveal className="hero__visual" delay={150}>
           <div className="hero__visual-card">
-            <img src="/assets/problem-statement-hero.png" alt="TraceWise showcase" />
-            <div className="hero__floating-note">
-              <strong>Real file in</strong>
-              <span>Exact PCB rules, reference comparison, and AI explanation on top.</span>
-            </div>
+            <img src="/assets/locohoc-logo.png" alt="LocoHOC logo showcase" />
           </div>
         </Reveal>
       </div>

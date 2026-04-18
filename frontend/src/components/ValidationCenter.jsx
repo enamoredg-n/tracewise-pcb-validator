@@ -56,7 +56,7 @@ function ResultTable({ rows }) {
   );
 }
 
-export default function ValidationCenter({ onBack }) {
+export default function ValidationCenter() {
   const [bootstrap, setBootstrap] = useState(null);
   const [bootstrapError, setBootstrapError] = useState("");
   const [candidateFile, setCandidateFile] = useState(null);
@@ -166,16 +166,11 @@ export default function ValidationCenter({ onBack }) {
       <section className="validation-center__hero">
         <Reveal className="validation-center__copy">
           <span className="section-kicker">Validation Center</span>
-          <h1>The React frontend now runs the full PCB review workflow.</h1>
+          <h3>Welcome to the Validation Center</h3>
           <p>
             Upload a candidate board, adjust exact rule thresholds, compare against a reference,
             and download the report directly from this interface.
           </p>
-          <div className="validation-center__actions">
-            <button className="button button--ghost" onClick={onBack}>
-              Back to Homepage
-            </button>
-          </div>
           {bootstrapError ? <div className="validation-banner validation-banner--error">{bootstrapError}</div> : null}
         </Reveal>
 
@@ -198,7 +193,7 @@ export default function ValidationCenter({ onBack }) {
         <form className="validation-form" onSubmit={handleSubmit}>
           <div className="validation-form__section">
             <div className="validation-form__header">
-              <h2>Input</h2>
+              <h3>Input</h3>
               <p>Bring in the candidate board and decide whether to compare against a reference.</p>
             </div>
 
@@ -240,7 +235,7 @@ export default function ValidationCenter({ onBack }) {
 
           <div className="validation-form__section">
             <div className="validation-form__header">
-              <h2>Rules</h2>
+              <h3>Rules</h3>
               <p>Switch between a custom rule set and the TRIAC sample limits derived from the demo board.</p>
             </div>
 
@@ -281,7 +276,7 @@ export default function ValidationCenter({ onBack }) {
 
           <div className="validation-form__section">
             <div className="validation-form__header">
-              <h2>Tolerances</h2>
+              <h3>Tolerances</h3>
               <p>Set the reference-comparison tolerance windows used during validation.</p>
             </div>
 
@@ -302,21 +297,16 @@ export default function ValidationCenter({ onBack }) {
         </form>
 
         <div className="validation-results">
-          <div className="validation-results__summary">
-            {summaryCards.length ? (
-              summaryCards.map((card) => (
-                <Reveal className="validation-metric" key={card.label}>
+          {summaryCards.length ? (
+            <Reveal className="validation-results__summary validation-results__summary--popup">
+              {summaryCards.map((card) => (
+                <div className="validation-metric" key={card.label}>
                   <span>{card.label}</span>
                   <strong>{card.value}</strong>
-                </Reveal>
-              ))
-            ) : (
-              <div className="validation-empty">
-                <strong>No validation run yet</strong>
-                <span>Run the form on the left to see metrics, results, and the PDF report.</span>
-              </div>
-            )}
-          </div>
+                </div>
+              ))}
+            </Reveal>
+          ) : null}
 
           {result ? (
             <>

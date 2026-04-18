@@ -7,7 +7,6 @@ export default function Navbar({
   onNavigateHome,
   onOpenValidationCenter,
   onToggleTheme,
-  showHomeCta,
 }) {
   const [open, setOpen] = useState(false);
 
@@ -15,11 +14,7 @@ export default function Navbar({
     <header className="navbar">
       <div className="navbar__inner">
         <button className="navbar__brand" onClick={onNavigateHome}>
-          <span className="navbar__brand-mark">TW</span>
-          <span className="navbar__brand-copy">
-            <strong>TraceWise</strong>
-            <small>PCB Validation Platform</small>
-          </span>
+          <span className="navbar__brand-mark">LocoHoco</span>
         </button>
 
         <nav className={`navbar__nav ${open ? "is-open" : ""}`}>
@@ -52,11 +47,6 @@ export default function Navbar({
             </span>
             <span className="theme-switch__label">{theme === "dark" ? "Dark" : "Light"}</span>
           </button>
-          {showHomeCta ? (
-            <button className="button button--secondary" onClick={onNavigateHome}>
-              Home
-            </button>
-          ) : null}
           <button className="button button--primary" onClick={onOpenValidationCenter}>
             Login
           </button>

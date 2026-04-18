@@ -7,7 +7,7 @@ export default function SectionBlock({ section, index }) {
       <div className={`section-block__layout ${index % 2 === 1 ? "is-reversed" : ""}`}>
         <Reveal className="section-block__intro">
           <span className="section-kicker">{section.kicker}</span>
-          <h2>{section.title}</h2>
+          <h3>{section.title}</h3>
           <p>{section.description}</p>
           <div className="section-block__bullets">
             {section.bullets.map((bullet) => (

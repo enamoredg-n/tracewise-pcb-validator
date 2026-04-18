@@ -9,10 +9,10 @@
   gap: 2.5rem;
 }
 
-.hero__copy h1 {
+.hero__copy h3 {
   margin: 0 0 1rem;
   color: var(--heading);
-  font-size: clamp(3rem, 7vw, 5.8rem);
+  font-size: clamp(1.8rem, 3.8vw, 3.1rem);
   line-height: 0.96;
   letter-spacing: -0.04em;
 }
@@ -32,8 +32,16 @@
   margin-top: 2rem;
 }
 
+.hero__visual {
+  width: 100%;
+  max-width: 30rem;
+  margin-left: auto;
+  align-self: start;
+}
+
 .hero__visual-card {
   position: relative;
+  overflow: hidden;
   padding: 1rem;
   border: 1px solid var(--border);
   border-radius: 2.2rem;
@@ -44,39 +52,15 @@
 
 .hero__visual-card img {
   width: 100%;
-  min-height: 420px;
-  object-fit: cover;
+  height: 260px;
+  object-fit: contain;
+  object-position: center;
+  transform: none;
   border-radius: 1.5rem;
+  display: block;
 }
-
-.hero__floating-note {
-  position: absolute;
-  right: 1.2rem;
-  bottom: 1.2rem;
-  width: min(18rem, calc(100% - 2.4rem));
-  padding: 1rem 1.1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.4rem;
-  background: rgba(11, 11, 14, 0.78);
-  color: #fffaf6;
-  backdrop-filter: blur(16px);
-}
-
-[data-theme="light"] .hero__floating-note {
-  background: rgba(255, 250, 244, 0.92);
-  color: var(--heading);
-}
-
-.hero__floating-note strong,
 .hero__stat strong {
   display: block;
-}
-
-.hero__floating-note span {
-  display: block;
-  margin-top: 0.45rem;
-  color: var(--text-soft);
-  line-height: 1.6;
 }
 
 .hero__stats {
@@ -125,11 +109,60 @@
     grid-template-columns: 1fr;
   }
 
+  .hero__visual {
+    max-width: 100%;
+  }
+
   .hero__stats {
     grid-template-columns: 1fr;
   }
 
   .hero__visual-card img {
-    min-height: 320px;
+    height: 220px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 1rem 0 3rem;
+  }
+
+  .hero__content {
+    gap: 1.3rem;
+  }
+
+  .hero__copy h3 {
+    font-size: clamp(1.45rem, 7vw, 2rem);
+    line-height: 1.08;
+  }
+
+  .hero__copy p {
+    font-size: 0.98rem;
+    line-height: 1.75;
+  }
+
+  .hero__actions {
+    gap: 0.7rem;
+    margin-top: 1.3rem;
+  }
+
+  .hero__actions .button {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hero__visual-card {
+    padding: 0.75rem;
+    border-radius: 1.5rem;
+  }
+
+  .hero__visual-card img {
+    height: 190px;
+    border-radius: 1rem;
+  }
+
+  .hero__stat {
+    padding: 1rem;
   }
 }
