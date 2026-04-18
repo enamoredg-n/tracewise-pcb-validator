@@ -25,7 +25,7 @@ export default function HeroSection({ onOpenValidationCenter }) {
 
         <Reveal className="hero__visual" delay={150}>
           <div className="hero__visual-card">
-            <img src="/assets/locohoc-logo.jpeg" alt="LocoHOC logo showcase" />
+            <img src="/assets/locohoc-logo.png" alt="LocoHOC logo showcase" />
           </div>
         </Reveal>
       </div>

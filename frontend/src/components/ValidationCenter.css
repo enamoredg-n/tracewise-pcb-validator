@@ -189,6 +189,9 @@
 
 .validation-form__submit {
   margin-top: 1rem;
+  align-self: start;
+  padding: 0.72rem 1.15rem;
+  font-size: 0.92rem;
 }
 
 .validation-banner--error {

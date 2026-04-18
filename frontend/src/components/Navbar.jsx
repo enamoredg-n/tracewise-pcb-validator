@@ -14,13 +14,7 @@ export default function Navbar({
     <header className="navbar">
       <div className="navbar__inner">
         <button className="navbar__brand" onClick={onNavigateHome}>
-          <span className="navbar__brand-mark">
-            <img src="/assets/locohoc-logo.jpeg" alt="LocoHOC logo" />
-          </span>
-          <span className="navbar__brand-copy">
-            <strong>LocoHOC</strong>
-            <small>PCB Validation Platform</small>
-          </span>
+          <span className="navbar__brand-mark">LocoHoco</span>
         </button>
 
         <nav className={`navbar__nav ${open ? "is-open" : ""}`}>
