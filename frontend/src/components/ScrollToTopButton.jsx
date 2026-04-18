@@ -17,7 +17,7 @@ export default function ScrollToTopButton() {
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       aria-label="Scroll to top"
     >
-      Top
+      &uarr;
     </button>
   );
 }
