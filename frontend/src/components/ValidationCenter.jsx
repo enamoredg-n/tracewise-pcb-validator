@@ -166,7 +166,7 @@ export default function ValidationCenter() {
       <section className="validation-center__hero">
         <Reveal className="validation-center__copy">
           <span className="section-kicker">Validation Center</span>
-          <h2>The React frontend now runs the full PCB review workflow.</h2>
+          <h3>The React frontend now runs the full PCB review workflow.</h3>
           <p>
             Upload a candidate board, adjust exact rule thresholds, compare against a reference,
             and download the report directly from this interface.
@@ -193,7 +193,7 @@ export default function ValidationCenter() {
         <form className="validation-form" onSubmit={handleSubmit}>
           <div className="validation-form__section">
             <div className="validation-form__header">
-              <h2>Input</h2>
+              <h3>Input</h3>
               <p>Bring in the candidate board and decide whether to compare against a reference.</p>
             </div>
 
@@ -235,7 +235,7 @@ export default function ValidationCenter() {
 
           <div className="validation-form__section">
             <div className="validation-form__header">
-              <h2>Rules</h2>
+              <h3>Rules</h3>
               <p>Switch between a custom rule set and the TRIAC sample limits derived from the demo board.</p>
             </div>
 
@@ -276,7 +276,7 @@ export default function ValidationCenter() {
 
           <div className="validation-form__section">
             <div className="validation-form__header">
-              <h2>Tolerances</h2>
+              <h3>Tolerances</h3>
               <p>Set the reference-comparison tolerance windows used during validation.</p>
             </div>
 
@@ -318,7 +318,7 @@ export default function ValidationCenter() {
               <Reveal className="validation-results__panel">
                 <div className="validation-results__panel-head">
                   <div>
-                    <h2>Validation Summary</h2>
+                    <h3>Validation Summary</h3>
                     <p>{result.reference_change_summary}</p>
                   </div>
                   <button className="button button--secondary" onClick={downloadReport}>
@@ -345,7 +345,7 @@ export default function ValidationCenter() {
               </Reveal>
 
               <Reveal className="validation-results__panel">
-                <h2>Measured Candidate Metrics</h2>
+                <h3>Measured Candidate Metrics</h3>
                 <div className="validation-results__metrics-list">
                   {Object.entries(result.candidate.metrics).map(([key, value]) => (
                     <div key={key} className="validation-results__metric-row">
@@ -358,7 +358,7 @@ export default function ValidationCenter() {
 
               {result.reference.metrics ? (
                 <Reveal className="validation-results__panel">
-                  <h2>Measured Reference Metrics</h2>
+                  <h3>Measured Reference Metrics</h3>
                   <div className="validation-results__metrics-list">
                     {Object.entries(result.reference.metrics).map(([key, value]) => (
                       <div key={key} className="validation-results__metric-row">
@@ -371,7 +371,7 @@ export default function ValidationCenter() {
               ) : null}
 
               <Reveal className="validation-results__panel">
-                <h2>All Validation Results</h2>
+                <h3>All Validation Results</h3>
                 <ResultTable rows={result.results} />
               </Reveal>
             </>

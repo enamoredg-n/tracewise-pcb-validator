@@ -11,7 +11,7 @@ export default function PipelineSection() {
     <section className="pipeline" id="pipeline">
       <Reveal className="pipeline__intro">
         <span className="section-kicker">Pipeline</span>
-        <h2>The workflow looks like a system presentation, not a static asset dropped onto a page.</h2>
+        <h3>The workflow looks like a system presentation, not a static asset dropped onto a page.</h3>
         <p>
           The central image anchors the narrative while hoverable labels unpack each stage of the
           validation pipeline in plain terms.

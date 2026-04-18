@@ -7,7 +7,7 @@
   margin-bottom: 2rem;
 }
 
-.pipeline__intro h2 {
+.pipeline__intro h3 {
   margin: 0 0 1rem;
   color: var(--heading);
   font-size: clamp(2.2rem, 4vw, 4rem);

@@ -9,10 +9,10 @@
   gap: 2.5rem;
 }
 
-.hero__copy h2 {
+.hero__copy h3 {
   margin: 0 0 1rem;
   color: var(--heading);
-  font-size: clamp(3rem, 7vw, 5.8rem);
+  font-size: clamp(1.8rem, 3.8vw, 3.1rem);
   line-height: 0.96;
   letter-spacing: -0.04em;
 }
@@ -32,8 +32,16 @@
   margin-top: 2rem;
 }
 
+.hero__visual {
+  width: 100%;
+  max-width: 30rem;
+  margin-left: auto;
+  align-self: start;
+}
+
 .hero__visual-card {
   position: relative;
+  overflow: hidden;
   padding: 1rem;
   border: 1px solid var(--border);
   border-radius: 2.2rem;
@@ -44,11 +52,12 @@
 
 .hero__visual-card img {
   width: 100%;
-  min-height: 420px;
-  object-fit: cover;
+  height: 260px;
+  object-fit: contain;
   object-position: center;
-  transform: scale(1.28);
+  transform: none;
   border-radius: 1.5rem;
+  display: block;
 }
 .hero__stat strong {
   display: block;
@@ -100,11 +109,15 @@
     grid-template-columns: 1fr;
   }
 
+  .hero__visual {
+    max-width: 100%;
+  }
+
   .hero__stats {
     grid-template-columns: 1fr;
   }
 
   .hero__visual-card img {
-    min-height: 320px;
+    height: 220px;
   }
 }

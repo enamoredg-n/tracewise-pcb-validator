@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="footer__panel reveal is-visible">
         <div>
           <span className="section-kicker">TraceWise</span>
-          <h2>AI-assisted PCB validation presented like a product, not a prototype.</h2>
+          <h3>AI-assisted PCB validation presented like a product, not a prototype.</h3>
         </div>
         <p>
           Real KiCad and DXF parsing, exact rule evaluation, reference-aware comparison, and a

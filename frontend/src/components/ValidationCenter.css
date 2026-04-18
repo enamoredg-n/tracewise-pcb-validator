@@ -27,7 +27,7 @@
   padding: 2rem;
 }
 
-.validation-center__copy h2 {
+.validation-center__copy h3 {
   margin: 0 0 1rem;
   color: var(--heading);
   font-size: clamp(2.4rem, 5vw, 4.5rem);
@@ -94,8 +94,8 @@
   padding: 1.45rem;
 }
 
-.validation-form__header h2,
-.validation-results__panel h2 {
+.validation-form__header h3,
+.validation-results__panel h3 {
   margin: 0 0 0.45rem;
   color: var(--heading);
 }
