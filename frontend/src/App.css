@@ -64,3 +64,22 @@ main,
     align-items: flex-start;
   }
 }
+
+@media (max-width: 640px) {
+  main,
+  .validation-center {
+    width: calc(100% - 0.8rem);
+    padding-top: 0.55rem;
+  }
+
+  .cta-panel {
+    gap: 1rem;
+    padding: 1.35rem;
+    border-radius: 1.4rem;
+  }
+
+  .cta-panel h2 {
+    font-size: clamp(1.45rem, 7vw, 2rem);
+    line-height: 1.12;
+  }
+}

@@ -121,3 +121,48 @@
     height: 220px;
   }
 }
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 1rem 0 3rem;
+  }
+
+  .hero__content {
+    gap: 1.3rem;
+  }
+
+  .hero__copy h3 {
+    font-size: clamp(1.45rem, 7vw, 2rem);
+    line-height: 1.08;
+  }
+
+  .hero__copy p {
+    font-size: 0.98rem;
+    line-height: 1.75;
+  }
+
+  .hero__actions {
+    gap: 0.7rem;
+    margin-top: 1.3rem;
+  }
+
+  .hero__actions .button {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hero__visual-card {
+    padding: 0.75rem;
+    border-radius: 1.5rem;
+  }
+
+  .hero__visual-card img {
+    height: 190px;
+    border-radius: 1rem;
+  }
+
+  .hero__stat {
+    padding: 1rem;
+  }
+}
