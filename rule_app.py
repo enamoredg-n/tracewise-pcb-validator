@@ -4,6 +4,8 @@ rule_app.py - focused Streamlit UI for exact PCB file validation.
 
 from __future__ import annotations
 
+import base64
+import mimetypes
 import os
 from pathlib import Path
 
@@ -24,6 +26,7 @@ from pcb_report_generator import generate_pcb_validation_report
 
 
 LOCAL_TRIAC_REFERENCE = Path("pcb_files/kicad/TRIAC/TRIAC.kicad_pcb")
+PRESENTATION_ASSETS_DIR = Path("presentation_assets")
 
 
 def _resolve_local_path(path_value: str) -> str:
@@ -218,6 +221,15 @@ def _reference_change_summary(rows: list[dict]) -> str:
         f"{component_changes} component-related changes, "
         f"{board_changes} board-size changes"
     )
+
+
+def _upload_signature(uploaded_file) -> tuple[str, int] | None:
+    if uploaded_file is None:
+        return None
+    try:
+        return (str(uploaded_file.name), len(uploaded_file.getvalue()))
+    except Exception:
+        return (str(getattr(uploaded_file, "name", "unknown")), -1)
 
 
 def _rows_frame(rows: list[dict], ordered_cols: list[str]) -> pd.DataFrame:
@@ -1025,6 +1037,668 @@ def _inject_theme():
         unsafe_allow_html=True,
     )
 
+    st.markdown(
+        """
+        <style>
+        .future-nav-shell {
+            position: sticky;
+            top: 0.7rem;
+            z-index: 20;
+            border-radius: 26px;
+            padding: 16px 18px;
+            background: linear-gradient(135deg, rgba(10, 18, 34, 0.92), rgba(16, 47, 77, 0.9));
+            border: 1px solid rgba(134, 194, 255, 0.18);
+            box-shadow: 0 24px 44px rgba(6, 18, 40, 0.24);
+            backdrop-filter: blur(18px);
+            margin-bottom: 1rem;
+        }
+
+        .future-nav-brand {
+            color: #f4f8ff;
+            font-size: 1.08rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .future-nav-copy {
+            color: #c3d3ea;
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .future-badge-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .future-badge {
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #ddedff;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .future-hero-shell {
+            position: relative;
+            min-height: 760px;
+            padding: 52px 42px 40px 42px;
+            border-radius: 34px;
+            overflow: hidden;
+            margin-bottom: 1.2rem;
+            background:
+                radial-gradient(circle at 14% 22%, rgba(41, 201, 247, 0.18), transparent 18%),
+                radial-gradient(circle at 80% 20%, rgba(255, 170, 102, 0.18), transparent 18%),
+                radial-gradient(circle at 72% 78%, rgba(83, 126, 255, 0.22), transparent 20%),
+                linear-gradient(135deg, #071325 0%, #0c2342 48%, #08162f 100%);
+            border: 1px solid rgba(128, 190, 255, 0.15);
+            box-shadow: 0 28px 70px rgba(8, 16, 32, 0.34);
+        }
+
+        .future-hero-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .future-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #d9e7ff;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .future-title-wrap {
+            position: relative;
+            margin: 18px 0 18px 0;
+            min-height: 178px;
+            perspective: 1200px;
+        }
+
+        .future-title-shadow,
+        .future-title-main {
+            font-size: clamp(2.8rem, 7vw, 6rem);
+            line-height: 0.88;
+            font-weight: 1000;
+            letter-spacing: -0.06em;
+            text-transform: uppercase;
+            max-width: 760px;
+        }
+
+        .future-title-shadow {
+            position: absolute;
+            inset: 10px auto auto 8px;
+            color: rgba(57, 115, 255, 0.22);
+            transform: rotateX(55deg) skewX(-10deg);
+            filter: blur(1px);
+            animation: floatDrift 7s ease-in-out infinite;
+        }
+
+        .future-title-main {
+            position: relative;
+            z-index: 2;
+            color: #f8fbff;
+            text-shadow:
+                0 0 18px rgba(31, 185, 238, 0.16),
+                0 10px 34px rgba(0, 0, 0, 0.28);
+            transform: translateZ(0);
+            animation: heroLift 6s ease-in-out infinite;
+        }
+
+        .future-subcopy {
+            max-width: 720px;
+            color: #c0d0e9;
+            font-size: 1.04rem;
+            line-height: 1.78;
+            margin-bottom: 18px;
+        }
+
+        .future-chip-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .future-chip {
+            padding: 10px 15px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #e6f1ff;
+            font-size: 0.87rem;
+            font-weight: 800;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .future-scene {
+            position: relative;
+            min-height: 620px;
+            border-radius: 28px;
+            overflow: hidden;
+            background:
+                linear-gradient(160deg, rgba(11, 27, 49, 0.96), rgba(11, 54, 82, 0.9)),
+                radial-gradient(circle at top, rgba(41, 201, 247, 0.2), transparent 26%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .future-scene-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 38px 38px;
+            opacity: 0.38;
+            mask-image: linear-gradient(180deg, rgba(0,0,0,1), transparent 95%);
+        }
+
+        .future-core-board {
+            position: absolute;
+            left: 50%;
+            top: 52%;
+            width: 320px;
+            height: 320px;
+            transform: translate(-50%, -50%) rotateX(61deg) rotateZ(-22deg);
+            border-radius: 34px;
+            background: linear-gradient(160deg, rgba(7, 15, 29, 0.95), rgba(9, 44, 73, 0.88));
+            border: 1px solid rgba(93, 225, 255, 0.2);
+            box-shadow:
+                0 36px 60px rgba(0, 0, 0, 0.34),
+                0 0 40px rgba(56, 170, 255, 0.12);
+            animation: boardHover 7s ease-in-out infinite;
+        }
+
+        .future-core-board::before {
+            content: "";
+            position: absolute;
+            inset: 18px;
+            border-radius: 26px;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(99, 255, 211, 0.2), transparent 22%),
+                linear-gradient(180deg, rgba(17, 69, 96, 0.95), rgba(12, 42, 68, 0.92));
+            border: 1px solid rgba(114, 245, 255, 0.18);
+        }
+
+        .future-track {
+            position: absolute;
+            z-index: 2;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #63f0d7, #21cde7);
+            box-shadow: 0 0 18px rgba(41, 201, 247, 0.26);
+        }
+
+        .future-track.t1 { left: 70px; top: 104px; width: 165px; height: 12px; }
+        .future-track.t2 { left: 70px; top: 104px; width: 12px; height: 108px; }
+        .future-track.t3 { left: 70px; top: 200px; width: 168px; height: 12px; }
+        .future-track.t4 { left: 155px; top: 148px; width: 12px; height: 64px; }
+        .future-track.t5 { left: 78px; top: 148px; width: 90px; height: 12px; }
+
+        .future-pad {
+            position: absolute;
+            z-index: 3;
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            background: rgba(5, 15, 29, 0.96);
+            border: 3px solid #b7fff1;
+            box-shadow: 0 0 20px rgba(61, 238, 202, 0.18);
+        }
+
+        .future-pad.p1 { left: 58px; top: 82px; }
+        .future-pad.p2 { right: 58px; top: 82px; }
+        .future-pad.p3 { left: 58px; bottom: 78px; }
+        .future-pad.p4 { right: 58px; bottom: 78px; }
+
+        .future-float {
+            position: absolute;
+            z-index: 4;
+            padding: 12px 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            color: #ebf4ff;
+            font-size: 0.9rem;
+            font-weight: 800;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 16px 34px rgba(7, 15, 29, 0.22);
+            animation: floatDrift 7s ease-in-out infinite;
+        }
+
+        .future-float small {
+            display: block;
+            margin-top: 4px;
+            color: #c1d8f4;
+            font-size: 0.76rem;
+            font-weight: 600;
+        }
+
+        .future-float.f1 { left: 26px; top: 44px; animation-delay: 0.2s; }
+        .future-float.f2 { right: 26px; top: 112px; animation-delay: 1s; }
+        .future-float.f3 { left: 22px; bottom: 116px; animation-delay: 1.8s; }
+        .future-float.f4 { right: 24px; bottom: 42px; animation-delay: 0.8s; }
+
+        .future-orbit {
+            position: absolute;
+            width: 420px;
+            height: 420px;
+            top: 95px;
+            left: calc(50% - 210px);
+            border-radius: 999px;
+            border: 1px dashed rgba(148, 206, 255, 0.18);
+            animation: spinSlow 18s linear infinite;
+        }
+
+        .future-orbit::before,
+        .future-orbit::after {
+            content: "";
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #21cde7, #7a8cff);
+            box-shadow: 0 0 16px rgba(41, 201, 247, 0.35);
+        }
+
+        .future-orbit::before { left: 18px; top: 50px; }
+        .future-orbit::after { right: 48px; bottom: 36px; }
+
+        .future-section {
+            margin-bottom: 1.25rem;
+        }
+
+        .future-panel {
+            position: relative;
+            overflow: hidden;
+            border-radius: 30px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.76);
+            border: 1px solid rgba(76, 117, 182, 0.14);
+            box-shadow: 0 24px 46px rgba(85, 114, 166, 0.08);
+        }
+
+        .future-panel.dark {
+            background: linear-gradient(140deg, rgba(10, 18, 34, 0.95), rgba(14, 50, 80, 0.9));
+            border: 1px solid rgba(115, 191, 255, 0.14);
+            box-shadow: 0 28px 60px rgba(7, 18, 38, 0.26);
+        }
+
+        .future-panel-kicker {
+            color: #3c82ff;
+            font-size: 0.82rem;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .future-panel.dark .future-panel-kicker {
+            color: #87dfff;
+        }
+
+        .future-panel-title {
+            color: #10233f;
+            font-size: clamp(1.5rem, 2.8vw, 2.35rem);
+            font-weight: 900;
+            line-height: 1.05;
+            margin-bottom: 12px;
+        }
+
+        .future-panel.dark .future-panel-title {
+            color: #f5f8ff;
+        }
+
+        .future-panel-copy {
+            color: #55708f;
+            max-width: 760px;
+            line-height: 1.8;
+            font-size: 1rem;
+            margin-bottom: 18px;
+        }
+
+        .future-panel.dark .future-panel-copy {
+            color: #cedcf0;
+        }
+
+        .future-icon-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .future-icon-card {
+            min-height: 180px;
+            border-radius: 24px;
+            padding: 22px 20px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 249, 255, 0.9));
+            border: 1px solid rgba(76, 117, 182, 0.12);
+            box-shadow: 0 18px 34px rgba(75, 108, 160, 0.08);
+            transform: perspective(1000px) rotateX(7deg);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .future-icon-card:hover {
+            transform: perspective(1000px) rotateX(0deg) translateY(-4px);
+            box-shadow: 0 24px 42px rgba(75, 108, 160, 0.12);
+        }
+
+        .future-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, rgba(11,185,212,0.12), rgba(43,115,255,0.16));
+        }
+
+        .future-icon-title {
+            color: #10233f;
+            font-size: 1.05rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .future-icon-copy {
+            color: #607a99;
+            line-height: 1.68;
+            font-size: 0.93rem;
+        }
+
+        .future-flow-shell {
+            position: relative;
+            margin-top: 14px;
+            padding: 26px;
+            border-radius: 30px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.04));
+            border: 1px solid rgba(255,255,255,0.09);
+        }
+
+        .future-flow-row {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            align-items: center;
+        }
+
+        .future-flow-row.secondary {
+            grid-template-columns: 1fr 1fr 1fr;
+            margin-top: 18px;
+        }
+
+        .future-flow-node {
+            position: relative;
+            min-height: 126px;
+            border-radius: 24px;
+            padding: 20px 18px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.11);
+            transform: perspective(1000px) rotateX(12deg);
+            box-shadow: 0 20px 38px rgba(0, 0, 0, 0.16);
+        }
+
+        .future-flow-node::after {
+            content: "";
+            position: absolute;
+            inset: auto 18px 14px 18px;
+            height: 6px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(33,205,231,0.22), rgba(122,140,255,0.1));
+        }
+
+        .future-flow-step {
+            color: #8addff;
+            font-size: 0.82rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .future-flow-title {
+            color: #f8fbff;
+            font-size: 1.02rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .future-flow-copy {
+            color: #d3e1f7;
+            line-height: 1.68;
+            font-size: 0.9rem;
+        }
+
+        .future-flow-link {
+            height: 3px;
+            margin: 26px 0 12px 0;
+            background: linear-gradient(90deg, rgba(33,205,231,0.2), rgba(122,140,255,0.8), rgba(255,184,100,0.22));
+            border-radius: 999px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .future-flow-link::after {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 -20%;
+            width: 26%;
+            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.7), rgba(255,255,255,0));
+            animation: travel 2.8s linear infinite;
+        }
+
+        .future-pipeline-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .future-pipeline-card {
+            min-height: 160px;
+            border-radius: 22px;
+            padding: 22px 20px;
+            background: rgba(255, 255, 255, 0.74);
+            border: 1px solid rgba(76, 117, 182, 0.12);
+            box-shadow: 0 18px 32px rgba(78, 111, 164, 0.08);
+        }
+
+        .future-pipeline-num {
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #0bb9d4, #2b73ff);
+        }
+
+        .future-scope-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .future-scope-card {
+            min-height: 220px;
+            border-radius: 24px;
+            padding: 22px 20px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(246,249,255,0.86));
+            border: 1px solid rgba(76, 117, 182, 0.12);
+            box-shadow: 0 22px 36px rgba(70, 102, 156, 0.08);
+            transform: perspective(1200px) rotateY(-8deg) rotateX(8deg);
+        }
+
+        .future-scope-card.alt {
+            transform: perspective(1200px) rotateY(8deg) rotateX(8deg);
+        }
+
+        .future-scope-title {
+            color: #10233f;
+            font-size: 1.04rem;
+            font-weight: 800;
+            margin: 12px 0 8px 0;
+        }
+
+        .future-scope-copy {
+            color: #607a99;
+            line-height: 1.7;
+            font-size: 0.92rem;
+        }
+
+        .future-glance-grid {
+            display: grid;
+            grid-template-columns: 0.98fr 1.02fr;
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .future-screen {
+            border-radius: 28px;
+            padding: 18px;
+            background: rgba(255,255,255,0.78);
+            border: 1px solid rgba(76, 117, 182, 0.12);
+            box-shadow: 0 22px 36px rgba(76, 103, 148, 0.08);
+        }
+
+        .future-screen img {
+            width: 100%;
+            border-radius: 20px;
+            display: block;
+        }
+
+        .future-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .future-mini-tile {
+            min-height: 156px;
+            border-radius: 22px;
+            padding: 20px 18px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(76, 117, 182, 0.12);
+            box-shadow: 0 18px 32px rgba(76, 103, 148, 0.08);
+        }
+
+        .future-cta-shell {
+            position: relative;
+            overflow: hidden;
+            padding: 34px 28px;
+            border-radius: 32px;
+            background: linear-gradient(135deg, rgba(8, 18, 36, 0.96), rgba(16, 71, 112, 0.92));
+            border: 1px solid rgba(120, 196, 255, 0.16);
+            box-shadow: 0 28px 68px rgba(8, 18, 36, 0.32);
+            text-align: center;
+            margin-top: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .future-cta-shell::before {
+            content: "";
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            right: -40px;
+            top: -80px;
+            border-radius: 999px;
+            background: radial-gradient(circle, rgba(33,205,231,0.22), transparent 68%);
+        }
+
+        .future-cta-title {
+            color: #f8fbff;
+            font-size: clamp(1.7rem, 3vw, 2.5rem);
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .future-cta-copy {
+            max-width: 780px;
+            margin: 0 auto;
+            color: #d3e3fb;
+            line-height: 1.78;
+        }
+
+        @keyframes heroLift {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-7px); }
+        }
+
+        @keyframes floatDrift {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(-10px) translateX(3px); }
+        }
+
+        @keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes boardHover {
+            0%, 100% { transform: translate(-50%, -50%) rotateX(61deg) rotateZ(-22deg); }
+            50% { transform: translate(-50%, -53%) rotateX(61deg) rotateZ(-20deg); }
+        }
+
+        @keyframes travel {
+            from { left: -28%; }
+            to { left: 104%; }
+        }
+
+        @media (max-width: 1100px) {
+            .future-hero-grid,
+            .future-glance-grid,
+            .future-icon-grid,
+            .future-pipeline-grid,
+            .future-scope-grid,
+            .future-mini-grid,
+            .future-flow-row,
+            .future-flow-row.secondary,
+            .future-module-grid,
+            .future-parse-grid {
+                grid-template-columns: minmax(0, 1fr) !important;
+            }
+
+            .future-hero-shell {
+                min-height: auto;
+                padding: 34px 24px;
+            }
+
+            .future-title-wrap {
+                min-height: 128px;
+            }
+
+            .future-scene {
+                min-height: 540px;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 def _hide_sidebar():
     st.markdown(
@@ -1041,6 +1715,432 @@ def _hide_sidebar():
         """,
         unsafe_allow_html=True,
     )
+
+
+def _inject_home_theme():
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background:
+                radial-gradient(circle at top left, rgba(46, 219, 159, 0.12), transparent 24%),
+                radial-gradient(circle at top right, rgba(46, 255, 187, 0.08), transparent 22%),
+                linear-gradient(180deg, #050b08 0%, #091511 42%, #06100d 100%) !important;
+            color: #eafff2 !important;
+        }
+
+        .future-section {
+            margin-bottom: 3.4rem;
+        }
+
+        .future-nav-shell {
+            background: linear-gradient(135deg, rgba(6, 14, 11, 0.96), rgba(11, 34, 24, 0.94));
+            border: 1px solid rgba(66, 255, 173, 0.16);
+            box-shadow: 0 28px 54px rgba(0, 0, 0, 0.28);
+        }
+
+        .future-nav-brand { color: #d7ffea; }
+        .future-nav-copy { color: #9fd6b8; }
+        .future-badge {
+            background: rgba(76, 255, 170, 0.08);
+            border-color: rgba(76, 255, 170, 0.16);
+            color: #d9ffec;
+        }
+
+        div[data-testid="stPopover"] button,
+        div[data-testid="stPopoverButton"] button,
+        div[data-testid="stPopover"] > button {
+            width: 58px !important;
+            height: 58px !important;
+            min-width: 58px !important;
+            padding: 0 !important;
+            border-radius: 999px !important;
+            background: linear-gradient(135deg, rgba(9, 22, 17, 0.96), rgba(18, 56, 39, 0.94)) !important;
+            border: 1px solid rgba(88, 255, 183, 0.18) !important;
+            color: #ddffee !important;
+            font-size: 1.35rem !important;
+            box-shadow: 0 22px 36px rgba(0, 0, 0, 0.22) !important;
+        }
+
+        .future-hero-shell {
+            background:
+                radial-gradient(circle at 14% 22%, rgba(62, 255, 181, 0.14), transparent 18%),
+                radial-gradient(circle at 80% 20%, rgba(102, 255, 209, 0.1), transparent 18%),
+                radial-gradient(circle at 72% 78%, rgba(47, 212, 127, 0.16), transparent 20%),
+                linear-gradient(135deg, #040a08 0%, #081612 48%, #05100c 100%);
+            border-color: rgba(75, 255, 171, 0.16);
+            box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+            min-height: 860px;
+            margin-top: 0.25rem;
+            margin-bottom: 0.95rem;
+        }
+
+        .future-kicker,
+        .future-chip,
+        .future-float,
+        .future-flow-node,
+        .future-panel,
+        .future-icon-card,
+        .future-pipeline-card,
+        .future-scope-card,
+        .future-mini-tile,
+        .future-screen {
+            border-color: rgba(84, 255, 179, 0.16) !important;
+        }
+
+        .future-title-shadow {
+            color: rgba(71, 255, 191, 0.16);
+        }
+
+        .future-title-main {
+            color: #f1fff7;
+            text-shadow:
+                0 0 18px rgba(81, 255, 184, 0.18),
+                0 10px 34px rgba(0, 0, 0, 0.34);
+        }
+
+        .future-subcopy,
+        .future-flow-copy,
+        .future-panel-copy,
+        .future-icon-copy,
+        .future-scope-copy,
+        .future-pipeline-card .workflow-copy,
+        .future-mini-tile .future-icon-copy {
+            color: #9ec8ad !important;
+        }
+
+        .future-chip,
+        .future-float,
+        .future-flow-node,
+        .future-panel.dark,
+        .future-flow-shell,
+        .future-screen {
+            background: linear-gradient(180deg, rgba(9, 20, 16, 0.92), rgba(11, 28, 21, 0.88)) !important;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.26);
+        }
+
+        .future-panel {
+            background: linear-gradient(180deg, rgba(8, 19, 14, 0.94), rgba(10, 27, 20, 0.9));
+            box-shadow: 0 24px 46px rgba(0, 0, 0, 0.22);
+            padding: 40px 36px;
+        }
+
+        .future-panel-title,
+        .future-icon-title,
+        .future-scope-title,
+        .future-flow-title,
+        .future-pipeline-card .workflow-title {
+            color: #dcffea !important;
+        }
+
+        .future-panel-kicker,
+        .future-flow-step {
+            color: #82ffbf !important;
+        }
+
+        .future-icon-card,
+        .future-pipeline-card,
+        .future-scope-card,
+        .future-mini-tile {
+            background: linear-gradient(180deg, rgba(11, 24, 18, 0.96), rgba(13, 31, 23, 0.9));
+            box-shadow: 0 22px 40px rgba(0, 0, 0, 0.24);
+        }
+
+        .future-icon {
+            background: linear-gradient(135deg, rgba(82, 255, 187, 0.14), rgba(71, 255, 151, 0.08));
+        }
+
+        .future-pipeline-num {
+            background: linear-gradient(135deg, #19d06f, #71ffbd);
+            color: #03120b;
+        }
+
+        .future-flow-link {
+            background: linear-gradient(90deg, rgba(34, 255, 148, 0.12), rgba(114, 255, 181, 0.8), rgba(34, 255, 148, 0.14));
+        }
+
+        .future-scope-card,
+        .future-scope-card.alt {
+            transform: perspective(1200px) rotateY(-6deg) rotateX(8deg);
+        }
+
+        .future-screen {
+            background: rgba(8, 18, 14, 0.94);
+            padding: 22px;
+        }
+
+        .future-module-grid {
+            display: grid;
+            grid-template-columns: 0.92fr 1.08fr;
+            gap: 26px;
+            margin-top: 24px;
+        }
+
+        .future-module-visual,
+        .future-module-story {
+            position: relative;
+            min-height: 360px;
+            border-radius: 28px;
+            padding: 28px 26px;
+            background: linear-gradient(180deg, rgba(11, 24, 18, 0.96), rgba(14, 34, 25, 0.92));
+            border: 1px solid rgba(84, 255, 179, 0.16);
+            box-shadow: 0 24px 44px rgba(0, 0, 0, 0.24);
+            overflow: hidden;
+        }
+
+        .future-module-visual::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(rgba(94,255,176,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(94,255,176,0.05) 1px, transparent 1px);
+            background-size: 34px 34px;
+            opacity: 0.38;
+        }
+
+        .future-module-lane {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            gap: 14px;
+        }
+
+        .future-code-pill {
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(84, 255, 179, 0.14);
+            color: #deffee;
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1.55;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+        }
+
+        .future-code-pill small {
+            display: block;
+            margin-top: 6px;
+            color: #8fbe9f;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .future-code-link {
+            position: relative;
+            z-index: 2;
+            height: 3px;
+            margin: 2px 24px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(86,255,174,0.1), rgba(86,255,174,0.82), rgba(86,255,174,0.1));
+            overflow: hidden;
+        }
+
+        .future-code-link::after {
+            content: "";
+            position: absolute;
+            width: 22%;
+            inset: 0 auto 0 -22%;
+            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.65), rgba(255,255,255,0));
+            animation: travel 2.6s linear infinite;
+        }
+
+        .future-module-orb {
+            position: absolute;
+            right: 24px;
+            top: 28px;
+            width: 118px;
+            height: 118px;
+            border-radius: 999px;
+            background: radial-gradient(circle, rgba(101,255,200,0.28), rgba(101,255,200,0.02) 68%);
+            filter: blur(4px);
+        }
+
+        .future-module-title {
+            color: #ddffee;
+            font-size: 1.38rem;
+            font-weight: 900;
+            margin-bottom: 14px;
+        }
+
+        .future-module-copy {
+            color: #9ec8ad;
+            line-height: 1.82;
+            font-size: 1rem;
+            margin-bottom: 18px;
+        }
+
+        .future-module-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .future-module-item {
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(84,255,179,0.12);
+            color: #d7ffea;
+            font-size: 0.92rem;
+            line-height: 1.66;
+        }
+
+        .future-parse-grid {
+            display: grid;
+            grid-template-columns: 1.08fr 0.92fr;
+            gap: 26px;
+            margin-top: 24px;
+        }
+
+        .future-parse-board {
+            position: relative;
+            min-height: 420px;
+            border-radius: 32px;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 18% 18%, rgba(80,255,186,0.12), transparent 20%),
+                radial-gradient(circle at 78% 26%, rgba(80,255,186,0.08), transparent 18%),
+                linear-gradient(155deg, rgba(8,18,13,0.98), rgba(10,32,22,0.94));
+            border: 1px solid rgba(84,255,179,0.15);
+            box-shadow: 0 24px 48px rgba(0,0,0,0.28);
+        }
+
+        .future-parse-board::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(84,255,179,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(84,255,179,0.05) 1px, transparent 1px);
+            background-size: 34px 34px;
+            opacity: 0.32;
+        }
+
+        .future-parse-core {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 72%;
+            height: 62%;
+            transform: translate(-50%, -50%) rotateX(58deg) rotateZ(-18deg);
+            border-radius: 30px;
+            background: linear-gradient(160deg, rgba(10,25,18,0.98), rgba(10,58,35,0.92));
+            border: 1px solid rgba(84,255,179,0.18);
+            box-shadow:
+                0 32px 60px rgba(0,0,0,0.34),
+                0 0 40px rgba(84,255,179,0.08);
+            animation: boardHover 7s ease-in-out infinite;
+        }
+
+        .future-parse-core::before {
+            content: "";
+            position: absolute;
+            inset: 18px;
+            border-radius: 24px;
+            border: 1px solid rgba(84,255,179,0.16);
+            background:
+                radial-gradient(circle at 20% 20%, rgba(84,255,179,0.12), transparent 18%),
+                linear-gradient(180deg, rgba(9,35,23,0.96), rgba(10,28,20,0.92));
+        }
+
+        .future-parse-label {
+            position: absolute;
+            z-index: 3;
+            padding: 12px 16px;
+            border-radius: 18px;
+            background: rgba(8, 25, 17, 0.92);
+            border: 1px solid rgba(84,255,179,0.16);
+            color: #e4fff0;
+            font-size: 0.9rem;
+            font-weight: 800;
+            box-shadow: 0 16px 34px rgba(0,0,0,0.22);
+            animation: floatDrift 7s ease-in-out infinite;
+        }
+
+        .future-parse-label small {
+            display: block;
+            margin-top: 4px;
+            color: #93c4a6;
+            font-size: 0.76rem;
+            font-weight: 600;
+        }
+
+        .future-parse-label.a { left: 24px; top: 24px; }
+        .future-parse-label.b { right: 26px; top: 88px; animation-delay: 0.9s; }
+        .future-parse-label.c { left: 28px; bottom: 84px; animation-delay: 1.4s; }
+        .future-parse-label.d { right: 20px; bottom: 28px; animation-delay: 0.6s; }
+
+        .future-parse-rail {
+            position: relative;
+            display: grid;
+            gap: 14px;
+            align-content: start;
+        }
+
+        .future-parse-pill {
+            padding: 16px 18px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(84,255,179,0.14);
+            color: #e1ffef;
+            font-size: 0.95rem;
+            line-height: 1.65;
+            font-weight: 700;
+        }
+
+        .future-parse-pill small {
+            display: block;
+            margin-top: 6px;
+            color: #92c2a5;
+            font-size: 0.77rem;
+            font-weight: 600;
+        }
+
+        .future-parse-arrow {
+            height: 3px;
+            margin: 4px 20px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(84,255,179,0.08), rgba(84,255,179,0.78), rgba(84,255,179,0.08));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .future-parse-arrow::after {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 -20%;
+            width: 22%;
+            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.62), rgba(255,255,255,0));
+            animation: travel 2.6s linear infinite;
+        }
+
+        .future-cta-shell {
+            background: linear-gradient(135deg, rgba(5, 13, 10, 0.98), rgba(10, 35, 24, 0.94));
+            border-color: rgba(84, 255, 179, 0.16);
+            box-shadow: 0 28px 68px rgba(0, 0, 0, 0.38);
+        }
+
+        .future-cta-title {
+            color: #ebfff4;
+        }
+
+        .future-cta-copy {
+            color: #a8d4b6;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+@st.cache_data(show_spinner=False)
+def _asset_data_uri(filename: str) -> str | None:
+    path = PRESENTATION_ASSETS_DIR / filename
+    if not path.is_file():
+        return None
+    mime = mimetypes.guess_type(str(path))[0] or "application/octet-stream"
+    payload = base64.b64encode(path.read_bytes()).decode("ascii")
+    return f"data:{mime};base64,{payload}"
 
 
 def _render_hero(ai_provider: str | None):
@@ -1193,163 +2293,305 @@ def _render_pipeline_diagram():
 
 def _render_landing_page(ai_provider: str | None):
     provider_label = ai_provider.capitalize() if ai_provider else "AI key not set"
+
     _hide_sidebar()
-    nav_left, nav_right = st.columns([0.76, 0.24], gap="large")
+    _inject_home_theme()
+    st.session_state.setdefault("home_profile_state", "Guest")
+
+    nav_left, nav_mid, nav_right = st.columns([0.56, 0.24, 0.2], gap="large")
     with nav_left:
         st.markdown(
             """
-            <div class="site-nav">
+            <div class="future-nav-shell">
                 <div>
-                    <div class="site-brand">PCB Design Intelligence</div>
-                    <div class="site-meta">Early-stage validation, reference drift detection, live watcher flow, and AI-assisted explanations.</div>
-                </div>
-                <div class="site-nav-links">
-                    <div class="site-link-pill">Home</div>
-                    <div class="site-link-pill">Architecture</div>
-                    <div class="site-link-pill">Validation</div>
-                    <div class="site-link-pill">AI Copilot</div>
+                    <div class="future-nav-brand">AI-PCB Validator</div>
+                    <div class="future-nav-copy">Futuristic PCB design review platform with exact rule checks, live monitoring, and AI guidance.</div>
+                    <div class="future-badge-row">
+                        <div class="future-badge">Presentation Home</div>
+                        <div class="future-badge">3D Story Scroll</div>
+                        <div class="future-badge">KiCad + AI</div>
+                    </div>
                 </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
-    with nav_right:
-        if st.button("Enter Validation Center", use_container_width=True, type="primary"):
+    with nav_mid:
+        if st.button("Open Validation Center", use_container_width=True, type="primary"):
             st.session_state["app_page"] = "validate"
             st.rerun()
-    _render_hero(ai_provider)
-    _render_overview(ai_provider)
-
-    st.markdown(
-        """
-        <div class="story-grid">
-            <div class="story-card">
-                <div class="story-kicker">Problem</div>
-                <div class="story-title">Manual board review is slow.</div>
-                <div class="story-copy">
-                    Engineers inspect board size, drill rules, trace health, and layout drift by hand. That burns time and still misses issues.
-                </div>
+        st.markdown(
+            """
+            <div class="future-badge-row" style="justify-content:center; margin-top:12px;">
+                <div class="future-badge">Validation center is always accessible</div>
             </div>
-            <div class="story-card">
-                <div class="story-kicker">Engine</div>
-                <div class="story-title">The platform checks the real board file.</div>
-                <div class="story-copy">
-                    It validates the actual KiCad design, not just screenshots. The result comes from design facts like drills, traces, nets, and components.
-                </div>
-            </div>
-            <div class="story-card">
-                <div class="story-kicker">Outcome</div>
-                <div class="story-title">Exact failures, then AI guidance.</div>
-                <div class="story-copy">
-                    The rule engine finds what broke. The AI copilot explains it, prioritizes it, and suggests what to fix first.
-                </div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    _render_pipeline_diagram()
+            """,
+            unsafe_allow_html=True,
+        )
+    with nav_right:
+        pop = getattr(st, "popover", None)
+        if pop:
+            with st.popover("◎"):
+                st.markdown(f"**Profile state:** `{st.session_state['home_profile_state']}`")
+                if st.button("Login", use_container_width=True, key="home_login_action"):
+                    st.session_state["home_profile_state"] = "Logged in"
+                    st.toast("Login panel comes next.")
+                if st.button("Logout", use_container_width=True, key="home_logout_action"):
+                    st.session_state["home_profile_state"] = "Guest"
+                    st.toast("Logout panel comes next.")
+        else:
+            st.caption("Profile")
 
     st.markdown(
         f"""
-        <div class="showcase-band">
-            <div class="panel-card">
-                <div class="panel-title">Why This Feels Like A Real Product</div>
-                <div class="panel-sub">
-                    Exact engineering truth first. AI assistance second. That is why the output feels trustworthy instead of gimmicky.
-                </div>
-                <div class="feature-list">
-                    <div class="feature-tile">
-                        <div class="feature-title">Exact Rule Truth</div>
-                        <div class="feature-copy">Checks board size, hole diameter, drill spacing, components, traces, clearance, and routed-net health directly from the PCB design file.</div>
+        <section class="future-section">
+            <div class="future-hero-shell">
+                <div class="future-hero-grid">
+                    <div>
+                        <div class="future-kicker">Future of PCB Design Review</div>
+                        <div class="future-title-wrap">
+                            <div class="future-title-shadow">AI-PCB<br>VALIDATOR</div>
+                            <div class="future-title-main">AI-PCB<br>VALIDATOR</div>
+                        </div>
+                        <div class="future-subcopy">
+                            A futuristic presentation surface for your project: explain the platform visually first,
+                            then unlock the real validation center after login.
+                        </div>
+                        <div class="future-chip-row">
+                            <div class="future-chip">Exact PCB Rules</div>
+                            <div class="future-chip">AI Copilot</div>
+                            <div class="future-chip">Live Watcher</div>
+                            <div class="future-chip">Smart Reports</div>
+                        </div>
                     </div>
-                    <div class="feature-tile">
-                        <div class="feature-title">Reference Drift Detection</div>
-                        <div class="feature-copy">Highlights changed drills, moved components, and board differences against a known-good baseline.</div>
-                    </div>
-                    <div class="feature-tile">
-                        <div class="feature-title">Live Monitor</div>
-                        <div class="feature-copy">The watcher can keep checking the board folder and automatically run validation whenever a file changes.</div>
-                    </div>
-                    <div class="feature-tile">
-                        <div class="feature-title">AI Guidance</div>
-                        <div class="feature-copy">Uses {provider_label} to explain failures, prioritize what matters first, and suggest likely fixes.</div>
-                    </div>
-                </div>
-            </div>
-            <div class="panel-card">
-                <div class="panel-title">What You Can Show In The Demo</div>
-                <div class="panel-sub">
-                    One scroll tells the story. One click opens the working tool.
-                </div>
-                <div class="feature-list" style="grid-template-columns:minmax(0,1fr);">
-                    <div class="feature-tile">
-                        <div class="feature-title">1. Show The Problem</div>
-                        <div class="feature-copy">Manual review is slow, inconsistent, and late.</div>
-                    </div>
-                    <div class="feature-tile">
-                        <div class="feature-title">2. Show The Architecture</div>
-                        <div class="feature-copy">Parser, rules, reference compare, watcher, score, and AI copilot.</div>
-                    </div>
-                    <div class="feature-tile">
-                        <div class="feature-title">3. Validate A Real Board</div>
-                        <div class="feature-copy">Use the bundled TRIAC board or a changed copy to show exact issues.</div>
-                    </div>
-                    <div class="feature-tile">
-                        <div class="feature-title">4. Show AI Fix Guidance</div>
-                        <div class="feature-copy">Ask the copilot to explain the failure and what to fix first.</div>
+                    <div class="future-scene">
+                        <div class="future-scene-grid"></div>
+                        <div class="future-orbit"></div>
+                        <div class="future-core-board">
+                            <div class="future-track t1"></div>
+                            <div class="future-track t2"></div>
+                            <div class="future-track t3"></div>
+                            <div class="future-track t4"></div>
+                            <div class="future-track t5"></div>
+                            <div class="future-pad p1"></div>
+                            <div class="future-pad p2"></div>
+                            <div class="future-pad p3"></div>
+                            <div class="future-pad p4"></div>
+                        </div>
+                        <div class="future-float f1">Rule Core<small>drills · traces · spacing</small></div>
+                        <div class="future-float f2">Drift Compare<small>reference vs candidate</small></div>
+                        <div class="future-float f3">Electrical Check<small>routing · net continuity</small></div>
+                        <div class="future-float f4">{provider_label}<small>fix-first guidance</small></div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
         """,
         unsafe_allow_html=True,
     )
 
     st.markdown(
         """
-        <div class="panel-card">
-            <div class="panel-title">How The Validation Center Works</div>
-            <div class="panel-sub">
-                Enter the working tool, choose the rules, run the board, then use the watcher and copilot on the same screen.
+        <section class="future-section">
+            <div class="future-panel dark">
+                <div class="future-panel-kicker">3D Flow Chart</div>
+                <div class="future-panel-title">One visual lane for the whole pipeline.</div>
+                <div class="future-panel-copy">
+                    Keep the text short. Let the structure do the explanation.
+                </div>
+                <div class="future-flow-shell">
+                    <div class="future-flow-row">
+                        <div class="future-flow-node">
+                            <div class="future-flow-step">Step 01</div>
+                            <div class="future-flow-title">KiCad Board</div>
+                            <div class="future-flow-copy">The real PCB file enters the platform from the design workflow.</div>
+                        </div>
+                        <div class="future-flow-node">
+                            <div class="future-flow-step">Step 02</div>
+                            <div class="future-flow-title">PCB Parser</div>
+                            <div class="future-flow-copy">Reads traces, drills, pads, parts, nets, and board dimensions.</div>
+                        </div>
+                        <div class="future-flow-node">
+                            <div class="future-flow-step">Step 03</div>
+                            <div class="future-flow-title">Rule Engine</div>
+                            <div class="future-flow-copy">Runs exact checks for geometry, manufacturing, and electrical health.</div>
+                        </div>
+                        <div class="future-flow-node">
+                            <div class="future-flow-step">Step 04</div>
+                            <div class="future-flow-title">AI Copilot</div>
+                            <div class="future-flow-copy">Explains what failed, why it matters, and what to fix first.</div>
+                        </div>
+                    </div>
+                    <div class="future-flow-link"></div>
+                    <div class="future-flow-row secondary">
+                        <div class="future-flow-node">
+                            <div class="future-flow-step">Parallel</div>
+                            <div class="future-flow-title">Reference Compare</div>
+                            <div class="future-flow-copy">Finds design drift against the approved board.</div>
+                        </div>
+                        <div class="future-flow-node">
+                            <div class="future-flow-step">Result</div>
+                            <div class="future-flow-title">Score + Severity</div>
+                            <div class="future-flow-copy">Groups issues into Mechanical, Manufacturing, and Electrical.</div>
+                        </div>
+                        <div class="future-flow-node">
+                            <div class="future-flow-step">Output</div>
+                            <div class="future-flow-title">Dashboard + Report</div>
+                            <div class="future-flow-copy">Presentation-ready output, live validation, and downloadable report.</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="workflow-grid" style="margin-top:16px;">
-                <div class="workflow-step">
-                    <div class="workflow-num">1</div>
-                    <div class="workflow-title">Load Design</div>
-                    <div class="workflow-copy">Upload a KiCad board or point the watcher at a live file.</div>
-                </div>
-                <div class="workflow-step">
-                    <div class="workflow-num">2</div>
-                    <div class="workflow-title">Run Exact Checks</div>
-                    <div class="workflow-copy">Measure drills, traces, spacing, board size, routing, and drift.</div>
-                </div>
-                <div class="workflow-step">
-                    <div class="workflow-num">3</div>
-                    <div class="workflow-title">Score + Categorize</div>
-                    <div class="workflow-copy">Group issues into severity and category with a validation score.</div>
-                </div>
-                <div class="workflow-step">
-                    <div class="workflow-num">4</div>
-                    <div class="workflow-title">Explain With AI</div>
-                    <div class="workflow-copy">Turn exact failures into a plain-language action plan.</div>
-                </div>
-            </div>
-        </div>
+        </section>
         """,
         unsafe_allow_html=True,
     )
 
     st.markdown(
         """
-        <div class="cta-shell">
-            <div class="cta-title">Presentation Website + Validation Center</div>
-            <div class="cta-copy">
-                Scroll here to tell the story. Enter the validation center to run the real PCB checks, show watcher results,
-                and ask the AI copilot for fix guidance.
+        <section class="future-section">
+            <div class="future-panel dark">
+                <div class="future-panel-kicker">Inside The PCB File</div>
+                <div class="future-panel-title">The parser is the engine block that teaches the platform what the board really is.</div>
+                <div class="future-panel-copy">It opens the real KiCad board file and turns hidden design structure into exact facts that rules and AI can use.</div>
+                <div class="future-parse-grid">
+                    <div class="future-parse-board">
+                        <div class="future-parse-core"></div>
+                        <div class="future-parse-label a">Edge.Cuts<small>board outline and size</small></div>
+                        <div class="future-parse-label b">Pads + Drills<small>holes, plated pads, diameters</small></div>
+                        <div class="future-parse-label c">Tracks + Vias<small>copper routes and width</small></div>
+                        <div class="future-parse-label d">Nets + Parts<small>what connects and where</small></div>
+                    </div>
+                    <div class="future-parse-rail">
+                        <div class="future-parse-pill">Board file enters parser<small>real .kicad_pcb design data, not a screenshot</small></div>
+                        <div class="future-parse-arrow"></div>
+                        <div class="future-parse-pill">Geometry is extracted<small>width, height, holes, pads, tracks, components</small></div>
+                        <div class="future-parse-arrow"></div>
+                        <div class="future-parse-pill">Design facts are structured<small>this becomes the truth layer for rules and comparison</small></div>
+                        <div class="future-parse-arrow"></div>
+                        <div class="future-parse-pill">Engine-ready data leaves parser<small>now the validator can measure and decide exactly</small></div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
+        <section class="future-section">
+            <div class="future-panel dark">
+                <div class="future-panel-kicker">Rule Engine</div>
+                <div class="future-panel-title">The rule engine decides what is right, wrong, risky, or broken.</div>
+                <div class="future-panel-copy">It converts parser facts into exact validation checks instead of vague anomaly guesses.</div>
+                <div class="future-module-grid">
+                    <div class="future-module-story">
+                        <div class="future-module-title">Three validation lanes</div>
+                        <div class="future-module-list">
+                            <div class="future-module-item">Mechanical: hole diameter, drill spacing, board size, component movement.</div>
+                            <div class="future-module-item">Manufacturing: trace width, edge clearance, spacing safety, fabricatability risk.</div>
+                            <div class="future-module-item">Electrical: broken copper, missing routing, continuity issues, routed-net regression.</div>
+                        </div>
+                    </div>
+                    <div class="future-module-visual">
+                        <div class="future-module-orb"></div>
+                        <div class="future-module-lane">
+                            <div class="future-code-pill">Mechanical Checks<small>holes, drills, parts, board geometry</small></div>
+                            <div class="future-code-link"></div>
+                            <div class="future-code-pill">Manufacturing Checks<small>trace width, clearance, edge safety</small></div>
+                            <div class="future-code-link"></div>
+                            <div class="future-code-pill">Electrical Checks<small>routing continuity, missing copper, net health</small></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
+        <section class="future-section">
+            <div class="future-panel dark">
+                <div class="future-panel-kicker">Reference Comparison</div>
+                <div class="future-panel-title">Reference comparison tells the system what changed from the approved board.</div>
+                <div class="future-panel-copy">This is where the platform becomes truly practical for real teams: it detects exact design drift instead of only checking isolated limits.</div>
+                <div class="future-module-grid">
+                    <div class="future-module-visual">
+                        <div class="future-module-orb"></div>
+                        <div class="future-module-lane">
+                            <div class="future-code-pill">Reference Board<small>trusted approved version</small></div>
+                            <div class="future-code-link"></div>
+                            <div class="future-code-pill">Candidate Board<small>new design being reviewed</small></div>
+                            <div class="future-code-link"></div>
+                            <div class="future-code-pill">Change Detection<small>moved drills, changed tracks, broken routing</small></div>
+                        </div>
+                    </div>
+                    <div class="future-module-story">
+                        <div class="future-module-title">Why this block is powerful</div>
+                        <div class="future-module-list">
+                            <div class="future-module-item">Catches changed hole diameters and moved components immediately.</div>
+                            <div class="future-module-item">Detects track-width drift and broken copper between versions.</div>
+                            <div class="future-module-item">Makes the output feel like a professional review system, not just a rule calculator.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
+        <section class="future-section">
+            <div class="future-panel">
+                <div class="future-panel-kicker">Project Scope</div>
+                <div class="future-panel-title">Project scope comes after the full engine story is clear.</div>
+                <div class="future-panel-copy">
+                    After parser, rules, and reference comparison are understood, this becomes the clean final scope summary.
+                </div>
+                <div class="future-scope-grid">
+                    <div class="future-scope-card">
+                        <div class="future-icon">M</div>
+                        <div class="future-scope-title">Mechanical</div>
+                        <div class="future-scope-copy">Hole size, drill count, drill spacing, component movement, and board-dimension drift.</div>
+                    </div>
+                    <div class="future-scope-card alt">
+                        <div class="future-icon">F</div>
+                        <div class="future-scope-title">Manufacturing</div>
+                        <div class="future-scope-copy">Trace width, edge clearance, spacing safety, and fabricatability-focused design checks.</div>
+                    </div>
+                    <div class="future-scope-card">
+                        <div class="future-icon">E</div>
+                        <div class="future-scope-title">Electrical</div>
+                        <div class="future-scope-copy">Missing copper, broken routed paths, continuity issues, and routing-health regression.</div>
+                    </div>
+                    <div class="future-scope-card alt">
+                        <div class="future-icon">AI</div>
+                        <div class="future-scope-title">AI Layer</div>
+                        <div class="future-scope-copy">Plain-English explanation, severity, fix-first guidance, and cleaner decision support.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
+        <section class="future-section">
+            <div class="future-cta-shell">
+                <div class="future-cta-title">Presentation Website + Validation Center</div>
+                <div class="future-cta-copy">
+                    Scroll this page to tell the story. Open the validation center to prove it with a real PCB file, real failures,
+                    real AI guidance, and a downloadable report.
+                </div>
+            </div>
+        </section>
         """,
         unsafe_allow_html=True,
     )
@@ -1417,8 +2659,8 @@ def main():
             st.caption(f"Active AI provider: {get_available_provider()}")
 
     _render_hero(ai_provider)
-    overview_tab, validate_tab, watcher_tab, copilot_tab = st.tabs(
-        ["Overview", "Validate Board", "Live Monitor", "AI Copilot"]
+    validate_tab, overview_tab, watcher_tab, copilot_tab = st.tabs(
+        ["Validate Board", "Overview", "Live Monitor", "AI Copilot"]
     )
 
     with overview_tab:
@@ -1480,12 +2722,14 @@ def main():
                 "PCB file to validate",
                 type=["kicad_pcb", "dxf"],
                 help="Upload the board you want to validate.",
+                key="validate_candidate_file",
             )
 
             reference_file = st.file_uploader(
                 "Optional reference PCB file",
                 type=["kicad_pcb", "dxf"],
                 help="If you upload a reference, the app will compare drill size, drill position, and board size.",
+                key="validate_reference_file",
             )
 
             st.markdown("### Validation Rules")
@@ -1630,7 +2874,12 @@ def main():
                         step=0.1,
                     )
 
-            run_validation = st.button("Validate PCB File", type="primary", use_container_width=True)
+            run_validation = st.button(
+                "Validate PCB File",
+                type="primary",
+                use_container_width=True,
+                key="validate_board_button",
+            )
 
         with right:
             st.markdown(
@@ -1692,6 +2941,26 @@ def main():
         "max_part_height": max_part_height,
         "enable_deep_erc": enable_deep_erc,
     }
+
+    candidate_signature = _upload_signature(candidate_file)
+    reference_signature = _upload_signature(reference_file)
+    active_reference_signature = (
+        reference_signature
+        if reference_signature is not None
+        else ("bundled-triac",)
+        if use_local_reference and local_reference_geometry is not None
+        else None
+    )
+    current_validation_signature = (
+        candidate_signature,
+        active_reference_signature,
+        tuple(sorted(rules.items())),
+        round(float(board_tolerance), 4),
+        round(float(drill_position_tolerance), 4),
+        round(float(drill_diameter_tolerance), 4),
+        round(float(component_position_tolerance), 4),
+        round(float(component_rotation_tolerance), 4),
+    )
 
     with watcher_tab:
         st.markdown(
@@ -1860,13 +3129,25 @@ def main():
         )
 
     if not run_validation:
-        combined_results = st.session_state.get("rule_combined_results")
-        combined_summary = st.session_state.get("rule_combined_summary")
-        candidate_geometry = st.session_state.get("rule_candidate_geometry")
-        candidate_extension = st.session_state.get("rule_candidate_extension")
-        candidate_name = st.session_state.get("rule_candidate_name")
-        reference_geometry = st.session_state.get("rule_reference_geometry")
-        reference_label = st.session_state.get("rule_reference_label")
+        stored_signature = st.session_state.get("rule_validation_signature")
+        if stored_signature != current_validation_signature:
+            combined_results = None
+            combined_summary = None
+            candidate_geometry = None
+            candidate_extension = None
+            candidate_name = None
+            reference_geometry = None
+            reference_label = None
+            if candidate_signature is not None:
+                st.session_state.pop("ai_guidance", None)
+        else:
+            combined_results = st.session_state.get("rule_combined_results")
+            combined_summary = st.session_state.get("rule_combined_summary")
+            candidate_geometry = st.session_state.get("rule_candidate_geometry")
+            candidate_extension = st.session_state.get("rule_candidate_extension")
+            candidate_name = st.session_state.get("rule_candidate_name")
+            reference_geometry = st.session_state.get("rule_reference_geometry")
+            reference_label = st.session_state.get("rule_reference_label")
     else:
         if candidate_file is None:
             st.error("Upload a PCB file first.")
@@ -1928,6 +3209,7 @@ def main():
         st.session_state["rule_candidate_name"] = candidate_name
         st.session_state["rule_reference_geometry"] = reference_geometry
         st.session_state["rule_reference_label"] = reference_label
+        st.session_state["rule_validation_signature"] = current_validation_signature
         st.session_state.pop("ai_guidance", None)
 
     if combined_results and combined_summary and candidate_geometry is not None:
@@ -2065,7 +3347,10 @@ def main():
                 )
     else:
         with validate_tab:
-            st.info("Upload a PCB file and run validation to populate the dashboard.")
+            if candidate_signature is not None:
+                st.info("Board loaded. Click `Validate PCB File` to run checks for the current inputs.")
+            else:
+                st.info("Upload a PCB file and run validation to populate the dashboard.")
         with copilot_tab:
             st.info("Run a validation first to unlock AI explanation and fix guidance.")
 
