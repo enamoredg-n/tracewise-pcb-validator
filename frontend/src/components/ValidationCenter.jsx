@@ -56,7 +56,7 @@ function ResultTable({ rows }) {
   );
 }
 
-export default function ValidationCenter({ onBack }) {
+export default function ValidationCenter() {
   const [bootstrap, setBootstrap] = useState(null);
   const [bootstrapError, setBootstrapError] = useState("");
   const [candidateFile, setCandidateFile] = useState(null);
@@ -166,16 +166,11 @@ export default function ValidationCenter({ onBack }) {
       <section className="validation-center__hero">
         <Reveal className="validation-center__copy">
           <span className="section-kicker">Validation Center</span>
-          <h1>The React frontend now runs the full PCB review workflow.</h1>
+          <h2>The React frontend now runs the full PCB review workflow.</h2>
           <p>
             Upload a candidate board, adjust exact rule thresholds, compare against a reference,
             and download the report directly from this interface.
           </p>
-          <div className="validation-center__actions">
-            <button className="button button--ghost" onClick={onBack}>
-              Back to Homepage
-            </button>
-          </div>
           {bootstrapError ? <div className="validation-banner validation-banner--error">{bootstrapError}</div> : null}
         </Reveal>
 
@@ -323,7 +318,7 @@ export default function ValidationCenter({ onBack }) {
               <Reveal className="validation-results__panel">
                 <div className="validation-results__panel-head">
                   <div>
-                    <h3>Validation Summary</h3>
+                    <h2>Validation Summary</h2>
                     <p>{result.reference_change_summary}</p>
                   </div>
                   <button className="button button--secondary" onClick={downloadReport}>
@@ -350,7 +345,7 @@ export default function ValidationCenter({ onBack }) {
               </Reveal>
 
               <Reveal className="validation-results__panel">
-                <h3>Measured Candidate Metrics</h3>
+                <h2>Measured Candidate Metrics</h2>
                 <div className="validation-results__metrics-list">
                   {Object.entries(result.candidate.metrics).map(([key, value]) => (
                     <div key={key} className="validation-results__metric-row">
@@ -363,7 +358,7 @@ export default function ValidationCenter({ onBack }) {
 
               {result.reference.metrics ? (
                 <Reveal className="validation-results__panel">
-                  <h3>Measured Reference Metrics</h3>
+                  <h2>Measured Reference Metrics</h2>
                   <div className="validation-results__metrics-list">
                     {Object.entries(result.reference.metrics).map(([key, value]) => (
                       <div key={key} className="validation-results__metric-row">
@@ -376,7 +371,7 @@ export default function ValidationCenter({ onBack }) {
               ) : null}
 
               <Reveal className="validation-results__panel">
-                <h3>All Validation Results</h3>
+                <h2>All Validation Results</h2>
                 <ResultTable rows={result.results} />
               </Reveal>
             </>

@@ -27,7 +27,7 @@
   padding: 2rem;
 }
 
-.validation-center__copy h1 {
+.validation-center__copy h2 {
   margin: 0 0 1rem;
   color: var(--heading);
   font-size: clamp(2.4rem, 5vw, 4.5rem);
@@ -38,13 +38,6 @@
   margin: 0;
   color: var(--text-soft);
   line-height: 1.9;
-}
-
-.validation-center__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.9rem;
-  margin-top: 1.8rem;
 }
 
 .validation-center__visual {
@@ -102,7 +95,7 @@
 }
 
 .validation-form__header h2,
-.validation-results__panel h3 {
+.validation-results__panel h2 {
   margin: 0 0 0.45rem;
   color: var(--heading);
 }

@@ -48,7 +48,6 @@ export default function App() {
         onNavigateHome={openHome}
         onOpenValidationCenter={openValidationCenter}
         onToggleTheme={toggleTheme}
-        showHomeCta={activeView === "validation"}
       />
 
       {activeView === "home" ? (
@@ -74,7 +73,7 @@ export default function App() {
           <Footer />
         </main>
       ) : (
-        <ValidationCenter onBack={openHome} />
+        <ValidationCenter />
       )}
 
       <ScrollToTopButton />

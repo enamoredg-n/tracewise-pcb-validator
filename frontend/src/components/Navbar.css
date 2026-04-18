@@ -35,13 +35,21 @@
 .navbar__brand-mark {
   display: grid;
   place-items: center;
-  width: 2.8rem;
-  height: 2.8rem;
+  width: 7rem;
+  height: 3.4rem;
   border-radius: 1rem;
-  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-  color: #1a130d;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.2rem;
+}
+
+.navbar__brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transform: none;
 }
 
 .navbar__brand-copy {
@@ -170,12 +178,6 @@
 
   .theme-switch__label,
   .navbar__brand-copy small {
-    display: none;
-  }
-}
-
-@media (max-width: 640px) {
-  .navbar__actions .button--secondary {
     display: none;
   }
 }

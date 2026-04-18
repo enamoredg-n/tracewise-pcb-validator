@@ -23,7 +23,7 @@ export default function SectionBlock({ section, index }) {
           {section.cards.map((card, cardIndex) => (
             <Reveal className="section-card" key={card.title} delay={cardIndex * 100}>
               <span className="section-card__badge">{card.badge}</span>
-              <h3>{card.title}</h3>
+              <h2>{card.title}</h2>
               <p>{card.text}</p>
             </Reveal>
           ))}
