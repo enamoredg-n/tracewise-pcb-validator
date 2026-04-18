@@ -4,6 +4,7 @@ import HeroSection from "./components/HeroSection";
 import Navbar from "./components/Navbar";
 import PipelineSection from "./components/PipelineSection";
 import ScrollToTopButton from "./components/ScrollToTopButton";
+import ScopeSection from "./components/ScopeSection";
 import SectionBlock from "./components/SectionBlock";
 import ValidationCenter from "./components/ValidationCenter";
 import { featureSections, navLinks } from "./data/content";
@@ -55,7 +56,11 @@ export default function App() {
           <HeroSection onOpenValidationCenter={openValidationCenter} />
           <PipelineSection />
           {featureSections.map((section, index) => (
-            <SectionBlock key={section.id} section={section} index={index} />
+            section.id === "scope" ? (
+              <ScopeSection key={section.id} />
+            ) : (
+              <SectionBlock key={section.id} section={section} index={index} />
+            )
           ))}
           <section className="cta-panel reveal">
             <div className="cta-panel__copy">

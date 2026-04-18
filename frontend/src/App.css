@@ -19,7 +19,7 @@ main,
 .validation-center {
   width: min(1180px, calc(100% - 2rem));
   margin: 0 auto;
-  padding-top: 5.75rem;
+  padding-top: 1rem;
 }
 
 .cta-panel {
@@ -56,7 +56,7 @@ main,
   main,
   .validation-center {
     width: min(100% - 1.1rem, 1180px);
-    padding-top: 5rem;
+    padding-top: 0.75rem;
   }
 
   .cta-panel {

@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
 :root {
   --bg: #0b0b0d;
   --bg-elevated: rgba(19, 19, 22, 0.84);
@@ -43,12 +45,7 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  font-family:
-    "Segoe UI",
-    "Inter",
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+  font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
   transition:
@@ -72,6 +69,19 @@ img {
 
 #root {
   min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+}
+
+p {
+  line-height: 1.7;
 }
 
 .section-kicker {
